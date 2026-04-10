@@ -1,0 +1,811 @@
+:root {
+    --bg-color: #0c111d;
+    --card-bg: rgba(30, 41, 59, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    /* Currency Colors */
+    --c-kzt: #fbbf24; /* Gold */
+    --c-usd: #22c55e; /* Green */
+    --c-try: #3b82f6; /* Blue */
+    --c-danger: #ef4444;
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(251, 191, 36, 0.1) 0, transparent 50%);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding-bottom: 20px;
+}
+
+/* Glassmorphism Utility */
+.glass {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+    background: rgba(12, 17, 29, 0.8);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.current-rates {
+    display: flex;
+    gap: 15px;
+}
+
+.rate-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.rate-item:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.rate-item .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: block;
+    text-transform: uppercase;
+}
+
+.rate-item .value {
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Main Content Layout */
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 5%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.summary-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.total-balance-v2 {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.total-balance-v2 .label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+.total-balance-v2 .main-balance {
+    font-size: 5rem;
+    font-weight: 800;
+    color: #fbbf24;
+    text-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+    margin-top: 10px;
+}
+
+.bank-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.advance-summary-card, .debt-summary-card {
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.advance-summary-card {
+    border-left: 5px solid #a855f7;
+}
+
+.debt-summary-card {
+    border-left: 5px solid #f97316;
+}
+
+.advance-summary-card:hover {
+    background: rgba(168, 85, 247, 0.05);
+    transform: translateY(-2px);
+}
+
+.debt-summary-card:hover {
+    background: rgba(249, 115, 22, 0.05);
+    transform: translateY(-2px);
+}
+
+.bank-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: var(--transition);
+}
+
+.bank-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary);
+}
+
+.bank-card-top span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.bank-card-balance {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.card {
+    padding: 25px;
+}
+
+.card h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Total Balance Card */
+.total-balance .main-balance {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: var(--c-kzt);
+}
+
+.currency-split {
+    display: flex;
+    gap: 15px;
+}
+
+.mini-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mini-card .currency {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.mini-card .amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.mini-card:nth-child(1) .amount { color: var(--c-usd); }
+.mini-card:nth-child(2) .amount { color: var(--c-try); }
+.mini-card:nth-child(3) .amount { color: var(--c-kzt); }
+
+/* Bank List */
+.bank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bank-item.clickable {
+    cursor: pointer;
+}
+
+.bank-item.clickable:hover {
+    border: 1px solid var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.statement-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.export-btns {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 8px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.statement-table-container {
+    overflow-x: auto;
+}
+
+.statement-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.statement-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.statement-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.statement-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.modal.large {
+    max-width: 800px;
+}
+
+/* Print Styles */
+@media print {
+    body * { visibility: hidden; }
+    #printableStatement, #printableStatement * { visibility: visible; }
+    #printableStatement {
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%;
+        color: black !important;
+        background: white !important;
+    }
+    .modal-overlay { background: white !important; position: static; }
+    .modal { 
+        box-shadow: none !important; 
+        border: none !important; 
+        background: white !important;
+        max-width: 100% !important;
+        color: black !important;
+    }
+    .btn-primary, .btn-secondary, .btn-icon, .statement-controls, .modal-header button {
+        display: none !important;
+    }
+    .glass {
+        background: white !important;
+        backdrop-filter: none !important;
+        border: none !important;
+    }
+    .statement-table th, .statement-table td {
+        border-bottom: 1px solid #ddd !important;
+        color: black !important;
+    }
+    .logo, .main-balance { color: black !important; }
+}
+
+.bank-item i {
+    color: var(--primary);
+    width: 24px;
+}
+
+.bank-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.bank-info .name {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.bank-info .balance {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Transaction List */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 8px 15px;
+    border-radius: 10px;
+    color: white;
+    outline: none;
+    transition: var(--transition);
+}
+
+.glass-input:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.transaction-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    border-radius: 18px;
+}
+
+.tx-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tx-icon.income { background: rgba(34, 197, 94, 0.1); color: var(--c-usd); }
+.tx-icon.expense { background: rgba(239, 68, 68, 0.1); color: var(--c-danger); }
+.tx-icon.transfer { background: rgba(59, 130, 246, 0.1); color: var(--c-try); }
+
+.tx-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.tx-title { font-weight: 600; font-size: 1rem; }
+.tx-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+.tx-amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: right;
+}
+
+/* Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    position: relative;
+    overflow-y: auto;
+    max-height: 90vh;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;/* Advance List Styling */
+.advance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.advance-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+}
+
+.advance-item-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.advance-item-val {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.advance-item-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+select.glass-input {
+    width: 100%;
+    cursor: pointer;
+}
+
+.hidden { display: none !important; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .bank-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .total-balance-v2 .main-balance {
+        font-size: 3.5rem;
+    }
+
+    .btn-text { display: none; }
+    .btn-add {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+    }
+}
+
+/* Gider Dağılımı Grafiği Stilleri */
+.chart-box {
+    padding: 10px 5px;
+}
+
+.chart-item {
+    margin-bottom: 20px;
+}
+
+.chart-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+.chart-bar-container {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.chart-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--c-usd));
+    border-radius: 10px;
+    transition: width 1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+.chart-percent {
+    color: var(--text-muted);
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.contact-card {
+    padding: 15px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.contact-card:hover {
+    background: rgba(255,255,255,0.05);
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.contact-card .name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contact-card .balance {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.contact-card .meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* --- MOBİL UYUMLULUK (RESPONSIVE) EKLEMELERİ --- */
+
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 80px; /* FAB için yer aç */
+    }
+
+    .top-bar {
+        padding: 15px 5%;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .current-rates {
+        gap: 8px;
+    }
+
+    .rate-item {
+        padding: 5px 10px;
+    }
+
+    .total-balance-v2 {
+        padding: 30px 10px;
+    }
+
+    .total-balance-v2 .main-balance {
+        font-size: 3rem;
+    }
+
+    .bank-row {
+        grid-template-columns: 1fr; /* Banka kartları alt alta */
+        gap: 12px;
+    }
+
+    .modal {
+        padding: 20px;
+        max-width: 95% !important;
+        margin: 10px;
+        border-radius: 15px;
+    }
+
+    .modal.large {
+        max-width: 98% !important;
+    }
+
+    .transaction-item {
+        grid-template-columns: auto 1fr auto; /* Tarihi veya meta veriyi sıkıştır */
+        padding: 12px 15px;
+        gap: 12px;
+    }
+
+    .tx-details {
+        max-width: 150px;
+    }
+
+    .tx-title {
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tx-meta {
+        font-size: 0.75rem;
+    }
+
+    .tx-amount {
+        font-size: 1rem;
+    }
+
+    /* Tablo kaydırma iyileştirmesi */
+    .table-container, .statement-table-container {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .statement-table th, .statement-table td {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .total-balance-v2 .main-balance {
+        font-size: 2.2rem;
+    }
+
+    .logo span {
+        display: none; /* Mobilde sadece ikon kalsın */
+    }
+
+    .top-bar {
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .advance-item {
+        grid-template-columns: 1fr; /* Avans listesi tek sütun */
+        gap: 10px;
+    }
+
+    .advance-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* --- MOBİL RAFİNE (Touch & Layout) --- */
+
+@media (max-width: 768px) {
+    .btn-add {
+        z-index: 999;
+    }
+
+    .transaction-item {
+        grid-template-columns: auto 1fr auto; /* Category/Bank'i detayların altına alalım */
+        padding: 15px;
+    }
+
+    .tx-meta {
+        margin-top: 2px;
+        display: block;
+    }
+    
+    .tx-details {
+        max-width: none; /* Mobilde kısıtlamayı kaldır */
+    }
+
+    /* Modal Alt Butonları Mobil Uyumu */
+    .form-group select, .form-group input {
+        font-size: 16px !important; /* iOS zoom engellemek için minimum 16px */
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: 12px 20px; /* Daha kolay dokunuş için */
+    }
+}
+
+/* Tablo görünümü için genel kapsayıcı */
+.table-container {
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow-x: auto;
+}

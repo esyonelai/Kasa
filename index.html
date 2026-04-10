@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kasa | Nakit Yönetimi</title>
+    <meta name="description" content="KZT, USD ve TRY kurlarında çalışan, banka ve masraf merkezi takibi sunan profesyonel kasa yönetim sistemi.">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Local Styles -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+    <div id="app">
+        <!-- Navigation / Top Bar -->
+        <nav class="top-bar">
+            <div class="logo">
+                <i data-lucide="wallet"></i>
+                <span>Kasa</span>
+            </div>
+            <div class="current-rates" id="ratesDisplay">
+                <div class="rate-item" onclick="app.openRatesModal()">
+                    <span class="label">USD/KZT</span>
+                    <span class="value" id="usdKztRate">---</span>
+                </div>
+                <div class="rate-item" onclick="app.openRatesModal()">
+                    <span class="label">USD/TRY</span>
+                    <span class="value" id="tryKztRate">---</span>
+                </div>
+            </div>
+            <button class="btn-primary btn-add" onclick="app.openTransactionModal()">
+                <i data-lucide="plus"></i>
+                <span class="btn-text">İşlem Ekle</span>
+            </button>
+        </nav>
+
+        <main class="content">
+            <!-- Summary Dashboard -->
+            <section class="summary-section">
+                <!-- Total Balance (Large & Yellow) -->
+                <div class="card glass total-balance-v2">
+                    <span class="label">TOPLAM BAKİYE (Kaspi + Halyk)</span>
+                    <div class="main-balance" id="totalBalanceKzt">0 ₸</div>
+                </div>
+
+                <!-- Action Grid for Totals -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <!-- Firma Avansları -->
+                    <div class="card glass advance-summary-card clickable" onclick="app.openAdvancesModal()">
+                        <div style="display: flex; align-items: center; gap: 10px; color: #a855f7;">
+                            <i data-lucide="building-2"></i>
+                            <span style="font-size: 0.8rem; font-weight: 600;">FİRMA AVANS</span>
+                        </div>
+                        <div class="stat-value" id="totalPendingAdvances" style="font-size: 1.4rem; font-weight: 800; margin-top: 5px;">0 ₸</div>
+                    </div>
+
+                    <!-- Verilen Borçlar -->
+                    <div class="card glass debt-summary-card clickable" onclick="app.openDebtsModal()">
+                        <div style="display: flex; align-items: center; gap: 10px; color: #f97316;">
+                            <i data-lucide="users"></i>
+                            <span style="font-size: 0.8rem; font-weight: 600;">VERİLEN BORÇ</span>
+                        </div>
+                        <div class="stat-value" id="totalPendingDebts" style="font-size: 1.4rem; font-weight: 800; margin-top: 5px;">0 ₸</div>
+                    </div>
+                </div>
+
+                <!-- Banks (Horizontal List) -->
+                <div class="bank-row">
+                    <div class="bank-card glass clickable" onclick="app.viewBankStatement('kaspi')">
+                        <div class="bank-card-top">
+                            <i data-lucide="building-2"></i>
+                            <span class="bank-name">Kaspi Bank</span>
+                        </div>
+                        <div class="bank-card-balance" id="bankKaspi">0 ₸</div>
+                    </div>
+                    <div class="bank-card glass clickable" onclick="app.viewBankStatement('halyk')">
+                        <div class="bank-card-top">
+                            <i data-lucide="landmark"></i>
+                            <span class="bank-name">Halyk Bank</span>
+                        </div>
+                        <div class="bank-card-balance" id="bankHalyk">0 ₸</div>
+                    </div>
+                    <div class="bank-card glass clickable" onclick="app.viewBankStatement('tr_bank')">
+                        <div class="bank-card-top">
+                            <i data-lucide="banknote"></i>
+                            <span class="bank-name">TR Bank</span>
+                        </div>
+                        <div class="bank-card-balance" id="bankTR">₺0</div>
+                    </div>
+                </div>
+
+                <!-- Gider Dağılımı (Stats) -->
+                <div class="card glass chart-card-v2">
+                    <h3>Gider Dağılımı</h3>
+                    <div id="expenseChartContainer" class="chart-box">
+                        <div class="empty-state">Henüz veri yok</div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Recent Transactions -->
+            <section class="transactions-section">
+                <div class="section-header">
+                    <h2>Son İşlemler</h2>
+                    <div class="filters">
+                        <input type="text" id="searchInput" placeholder="İşlem ara..." class="glass-input">
+                        <button class="btn-icon" title="Filtrele"><i data-lucide="filter"></i></button>
+                    </div>
+                </div>
+                <div class="transaction-list" id="transactionList">
+                    <!-- Transactions injected by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Modals -->
+        <div id="modalOverlay" class="modal-overlay hidden">
+            <!-- Modal content injected dynamically -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="store.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
