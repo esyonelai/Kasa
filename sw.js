@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kasa-v2';
+const CACHE_NAME = 'kasa-v3';
 const ASSETS = [
   './',
   './index.html',
