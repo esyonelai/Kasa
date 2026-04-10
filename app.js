@@ -1,5 +1,13 @@
 const app = {
+    deferredPrompt: null,
+
     init() {
+        // Handle PWA Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            this.deferredPrompt = e;
+        });
+
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -328,9 +336,22 @@ const app = {
                             </div>
                         `).join('')}
                     </div>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="newCategoryName" class="glass-input" placeholder="Yeni kategori..." style="flex: 1;">
-                        <button class="btn-primary" onclick="app.handleAddCategory()"><i data-lucide="plus"></i> Ekle</button>
+                <section style="margin-top: 25px; background: rgba(99, 102, 241, 0.05); padding: 15px; border-radius: 15px; border: 1px dashed rgba(99, 102, 241, 0.3);">
+                    <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="smartphone" style="width: 16px;"></i> Kurulum Yardımcısı
+                    </h3>
+                    
+                    <div id="pwaStatus">
+                        ${this.deferredPrompt ? `
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px;">Uygulamayı Android cihazınıza APK gibi yükleyebilirsiniz.</p>
+                            <button class="btn-primary" onclick="app.handlePWAInstall()" style="width: 100%; justify-content: center; background: var(--primary);">
+                                <i data-lucide="download"></i> Uygulamayı Şimdi Yükle
+                            </button>
+                        ` : `
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">
+                                <b>iPhone Kullanıcıları:</b> Safari alt menüsündeki <i data-lucide="share" style="width:12px; vertical-align:middle;"></i> <b>Paylaş</b> butonuna basıp <b>"Ana Ekrana Ekle"</b> seçeneğini kullanarak uygulamayı yükleyebilir.
+                            </p>
+                        `}
                     </div>
                 </section>
             </div>
@@ -460,6 +481,15 @@ const app = {
             Store.deleteExpenseCenter(name);
             this.openRatesModal(); // Re-render modal
         }
+    },
+
+    async handlePWAInstall() {
+        if (!this.deferredPrompt) return;
+        this.deferredPrompt.prompt();
+        const { outcome } = await this.deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        this.deferredPrompt = null;
+        this.openRatesModal(); // Refresh modal to hide button
     },
 
     deleteTx(id) {
