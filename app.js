@@ -4,7 +4,20 @@ const app = {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW Registered', reg))
+                    .then(reg => {
+                        console.log('SW Registered', reg);
+                        // Force update if new worker found
+                        reg.onupdatefound = () => {
+                            const newWorker = reg.installing;
+                            newWorker.onstatechange = () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (confirm('Yeni bir güncelleme var! Sayfayı yenilemek ister misiniz?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            };
+                        };
+                    })
                     .catch(err => console.log('SW Error', err));
             });
         }
@@ -301,6 +314,25 @@ const app = {
                         <i data-lucide="trash-2"></i> Tüm Verileri Sıfırla
                     </button>
                 </section>
+
+                <section style="margin-top: 25px;">
+                    <h3 style="font-size: 0.9rem; color: #a855f7; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">Masraf Merkezleri</h3>
+                    <div id="categoryManager" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; max-height: 200px; overflow-y: auto;">
+                        ${Store.state.expenseCenters.map(cat => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px;">
+                                <span style="font-size: 0.85rem;">${cat}</span>
+                                ${['Giderler', 'Açılış', 'Transfer'].includes(cat) ? 
+                                    '<span style="font-size: 0.7rem; opacity: 0.5;">Sistem</span>' : 
+                                    `<button class="btn-icon" onclick="app.handleDeleteCategory('${cat}')"><i data-lucide="trash-2" style="width:14px; color: var(--c-danger)"></i></button>`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newCategoryName" class="glass-input" placeholder="Yeni kategori..." style="flex: 1;">
+                        <button class="btn-primary" onclick="app.handleAddCategory()"><i data-lucide="plus"></i> Ekle</button>
+                    </div>
+                </section>
             </div>
         `;
         overlay.classList.remove('hidden');
@@ -412,6 +444,22 @@ const app = {
         this.renderDashboard();
         this.renderExpenseStats();
         this.closeModal();
+    },
+
+    handleAddCategory() {
+        const input = document.getElementById('newCategoryName');
+        const name = input.value.trim();
+        if (name) {
+            Store.addExpenseCenter(name);
+            this.openRatesModal(); // Re-render modal
+        }
+    },
+
+    handleDeleteCategory(name) {
+        if (confirm(`${name} kategorisini silmek istediğinize emin misiniz?`)) {
+            Store.deleteExpenseCenter(name);
+            this.openRatesModal(); // Re-render modal
+        }
     },
 
     deleteTx(id) {

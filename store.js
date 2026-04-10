@@ -20,10 +20,18 @@ const Store = {
         const savedData = localStorage.getItem('kasa_data');
         if (savedData) {
             const data = JSON.parse(savedData);
-            // Overwrite categories from code to ensure they are up to date
-            data.expenseCenters = [
-                'Giderler', 'Açılış', 'Transfer'
-            ];
+            
+            // Ensure expenseCenters exist and are not empty
+            if (!data.expenseCenters || data.expenseCenters.length === 0) {
+                data.expenseCenters = ['Giderler', 'Açılış', 'Transfer'];
+            }
+            
+            // Ensure default categories are always there
+            const defaults = ['Giderler', 'Açılış', 'Transfer'];
+            defaults.forEach(def => {
+                if (!data.expenseCenters.includes(def)) data.expenseCenters.push(def);
+            });
+
             // Ensure rates exist
             data.rates = { ...this.state.rates, ...(data.rates || {}) };
             this.state = data;
@@ -32,6 +40,21 @@ const Store = {
             const savedRates = localStorage.getItem('kasa_rates');
             if (savedRates) this.state.rates = { ...this.state.rates, ...JSON.parse(savedRates) };
         }
+    },
+
+    addExpenseCenter(name) {
+        if (!name || this.state.expenseCenters.includes(name)) return;
+        this.state.expenseCenters.push(name);
+        this.save();
+    },
+
+    deleteExpenseCenter(name) {
+        // Don't allow deleting defaults
+        const defaults = ['Giderler', 'Açılış', 'Transfer'];
+        if (defaults.includes(name)) return;
+        
+        this.state.expenseCenters = this.state.expenseCenters.filter(c => c !== name);
+        this.save();
     },
 
     // Central Conversion Engine
