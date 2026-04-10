@@ -321,7 +321,7 @@ const app = {
                         ${Store.state.expenseCenters.map(cat => `
                             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 10px;">
                                 <span style="font-size: 0.85rem;">${cat}</span>
-                                ${['Giderler', 'Açılış', 'Transfer'].includes(cat) ? 
+                                ${['Giderler', 'Açılış', 'Transfer', 'Özel Gider'].includes(cat) ? 
                                     '<span style="font-size: 0.7rem; opacity: 0.5;">Sistem</span>' : 
                                     `<button class="btn-icon" onclick="app.handleDeleteCategory('${cat}')"><i data-lucide="trash-2" style="width:14px; color: var(--c-danger)"></i></button>`
                                 }

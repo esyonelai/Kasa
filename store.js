@@ -12,7 +12,7 @@ const Store = {
             { id: 'tr_bank', name: 'TR Bank', currency: 'TRY', balance: 0 }
         ],
         expenseCenters: [
-            'Giderler', 'Açılış', 'Transfer'
+            'Giderler', 'Açılış', 'Transfer', 'Özel Gider'
         ]
     },
 
@@ -23,11 +23,11 @@ const Store = {
             
             // Ensure expenseCenters exist and are not empty
             if (!data.expenseCenters || data.expenseCenters.length === 0) {
-                data.expenseCenters = ['Giderler', 'Açılış', 'Transfer'];
+                data.expenseCenters = ['Giderler', 'Açılış', 'Transfer', 'Özel Gider'];
             }
             
             // Ensure default categories are always there
-            const defaults = ['Giderler', 'Açılış', 'Transfer'];
+            const defaults = ['Giderler', 'Açılış', 'Transfer', 'Özel Gider'];
             defaults.forEach(def => {
                 if (!data.expenseCenters.includes(def)) data.expenseCenters.push(def);
             });
@@ -50,7 +50,7 @@ const Store = {
 
     deleteExpenseCenter(name) {
         // Don't allow deleting defaults
-        const defaults = ['Giderler', 'Açılış', 'Transfer'];
+        const defaults = ['Giderler', 'Açılış', 'Transfer', 'Özel Gider'];
         if (defaults.includes(name)) return;
         
         this.state.expenseCenters = this.state.expenseCenters.filter(c => c !== name);
