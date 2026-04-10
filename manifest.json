@@ -10,6 +10,22 @@
   "theme_color": "#0f172a",
   "orientation": "portrait",
   "categories": ["finance", "business"],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobil Görünüm"
+    },
+    {
+      "src": "icons/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Masaüstü Görünüm"
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-192.png",
