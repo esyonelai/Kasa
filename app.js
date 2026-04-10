@@ -115,6 +115,10 @@ const app = {
                 <form id="txForm" onsubmit="app.handleTxSubmit(event)">
                     <input type="hidden" id="txId" value="${isEdit ? editingTx.id : ''}">
                     <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" class="glass-input" id="txDate" value="${isEdit ? new Date(editingTx.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}" required>
+                    </div>
+                    <div class="form-group">
                         <label>İşlem Tipi</label>
                         <select class="glass-input" id="txType">
                             <option value="expense" ${isEdit && editingTx.type === 'expense' ? 'selected' : ''}>Gider</option>
@@ -350,6 +354,7 @@ const app = {
     handleTxSubmit(event) {
         event.preventDefault();
         const txId = document.getElementById('txId').value;
+        const txDate = document.getElementById('txDate').value; // Formdaki tarih
         const type = document.getElementById('txType').value;
         const amount = parseFloat(document.getElementById('txAmount').value);
         const currency = document.getElementById('txCurrency').value;
@@ -372,7 +377,7 @@ const app = {
             advanceStatus: (type === 'expense' && isSpecialFlag && specialType === 'avans') ? 'pending' : undefined,
             isDebt: type === 'expense' && isSpecialFlag && specialType === 'borc',
             debtStatus: (type === 'expense' && isSpecialFlag && specialType === 'borc') ? 'pending' : undefined,
-            date: txId ? undefined : new Date().toISOString()
+            date: txDate + 'T12:00:00' // Öğle vaktini varsayalım ki timezone kayması olmasın
         };
 
         if (txId) {
