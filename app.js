@@ -49,7 +49,7 @@ const app = {
         document.getElementById('tryKztRate').textContent = Store.state.rates.usdTry + ' ₺';
     },
 
-    openAnalyticsModal(month = null, year = null) {
+        openAnalyticsModal(month = null, year = null) {
         const overlay = document.getElementById('modalOverlay');
         const now = new Date();
         const currentYear = year || now.getFullYear();
@@ -88,23 +88,23 @@ const app = {
             if (b.income === 0 && b.expense === 0) return ''; 
 
             const net = b.income - b.expense;
-            const netColor = net >= 0 ? 'var(--c-income)' : 'var(--c-danger)';
+            const netColor = net >= 0 ? '#22c55e' : '#ef4444';
             const bankClass = id === 'kaspi' ? 'kaspi' : (id === 'halyk' ? 'halyk' : (id === 'tr_bank' ? 'tr' : ''));
 
             return `
                 <div class="glass bank-report-card ${bankClass}">
                     <div class="bank-report-header">
-                        <i data-lucide="${b.isHidden ? 'lock' : 'landmark'}" style="width:16px;"></i>
+                        <span style="color:${bankClass === 'kaspi' ? '#f22c2c' : (bankClass === 'halyk' ? '#00b159' : '#3b82f6')};">●</span>
                         ${b.name}
                     </div>
                     <div class="bank-report-stats">
                         <div class="stat-row">
                             <span class="label">Giriş:</span>
-                            <span class="val" style="color:var(--c-income);">+${this.formatCurrency(b.income, b.currency)}</span>
+                            <span class="val" style="color:#22c55e;">+${this.formatCurrency(b.income, b.currency)}</span>
                         </div>
                         <div class="stat-row">
                             <span class="label">Çıkış:</span>
-                            <span class="val" style="color:var(--c-danger);">-${this.formatCurrency(b.expense, b.currency)}</span>
+                            <span class="val" style="color:#ef4444;">-${this.formatCurrency(b.expense, b.currency)}</span>
                         </div>
                     </div>
                     <div class="bank-report-net" style="color:${netColor}">
@@ -115,6 +115,59 @@ const app = {
 
         const monthOptions = [
             { v: 0, n: 'Tüm Yıl (Yıllık)' },
+            { v: 1, n: 'Ocak' }, { v: 2, n: 'Şubat' }, { v: 3, n: 'Mart' },
+            { v: 4, n: 'Nisan' }, { v: 5, n: 'Mayıs' }, { v: 6, n: 'Haziran' },
+            { v: 7, n: 'Temmuz' }, { v: 8, n: 'Ağustos' }, { v: 9, n: 'Eylül' },
+            { v: 10, n: 'Ekim' }, { v: 11, n: 'Kasım' }, { v: 12, n: 'Aralık' }
+        ].map(m => `<option value="${m.v}" ${currentMonth === m.v ? 'selected' : ''}>${m.n}</option>`).join('');
+
+        const monthName = currentMonth === 0 ? 'Tüm Yıl' : (document.querySelector(`option[value="${currentMonth}"]`)?.text || 'Ay');
+
+        overlay.innerHTML = `
+            <div class="card glass modal large" style="max-height: 95vh; overflow-y: auto; position: relative; padding: 30px;">
+                <button class="btn-icon" onclick="app.closeModal()" style="position: absolute; right: 20px; top: 20px; z-index: 100; background: rgba(255,255,255,0.05); border-radius: 50%;"><i data-lucide="x"></i></button>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h1 style="margin:0; font-size:1.8rem; font-weight: 800; color: var(--text-main);">Banka Dağılım Raporu</h1>
+                        <p style="margin:8px 0 0; font-size:0.9rem; color:var(--text-muted);">${currentMonth === 0 ? currentYear : monthName + ' ' + currentYear} - Aylık Görünüm</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select class="glass-input" style="padding: 8px 15px; border-radius: 12px; font-weight: 600;" onchange="app.openAnalyticsModal(${currentMonth}, this.value)">
+                            <option value="2026" ${currentYear == 2026 ? 'selected' : ''}>2026</option>
+                            <option value="2025" ${currentYear == 2025 ? 'selected' : ''}>2025</option>
+                        </select>
+                        <select class="glass-input" style="padding: 8px 15px; border-radius: 12px; font-weight: 600;" onchange="app.openAnalyticsModal(this.value, ${currentYear})">
+                            ${monthOptions}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grand-totals">
+                    <div class="glass total-card">
+                        <div class="label">GENEL GELİR</div>
+                        <div class="value" style="color:#22c55e;">+${this.formatCurrency(totalIncomeKzt, 'KZT')}</div>
+                    </div>
+                    <div class="glass total-card">
+                        <div class="label">GENEL GİDER</div>
+                        <div class="value" style="color:#ef4444;">-${this.formatCurrency(totalExpenseKzt, 'KZT')}</div>
+                    </div>
+                </div>
+
+                <div class="bank-report-grid">
+                    ${bankCardsHtml || '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-muted); font-size: 1.1rem;">Bu dönem için herhangi bir banka işlemi kaydı bulunamadı.</div>'}
+                </div>
+
+                <div style="text-align:center; margin-top: 30px;">
+                    <p style="color:var(--text-muted); font-size:0.85rem; opacity: 0.7;">
+                        Bu rapor banka bazlı bir performans tablosudur. <br>
+                        Harcama kategorileri ve günlük detaylar dahil edilmemiştir.
+                    </p>
+                </div>
+            </div>`;
+        overlay.classList.remove('hidden');
+        lucide.createIcons();
+    },
             { v: 1, n: 'Ocak' }, { v: 2, n: 'Şubat' }, { v: 3, n: 'Mart' },
             { v: 4, n: 'Nisan' }, { v: 5, n: 'Mayıs' }, { v: 6, n: 'Haziran' },
             { v: 7, n: 'Temmuz' }, { v: 8, n: 'Ağustos' }, { v: 9, n: 'Eylül' },
