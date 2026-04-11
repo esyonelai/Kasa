@@ -411,38 +411,41 @@ const app = {
             </div>`).join('');
 
         const gridHtml = hiddenBanks.map(b => `
-            <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">
-                    <h3 style="font-size: 0.9rem; margin: 0; color: var(--text-main); font-weight: 600;">${b.name} Ayarları</h3>
-                    <button class="btn-icon" onclick="app.handleDeleteSecretCard('${b.id}')" style="width: 24px; height: 24px; padding: 0;" title="Kartı Çıkar/Sil">
-                        <i data-lucide="trash-2" style="width:14px; color: var(--c-danger); opacity: 0.6;"></i>
+            <div class="bank-card glass animate-in" style="padding: 15px; position: relative; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="const n=prompt('Yeni isim:', '${b.name}'); if(n) app.updateSecretCardName('${b.id}', n)">
+                        <i data-lucide="shield" class="kaspi-color" style="width: 18px; height: 18px;"></i>
+                        <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                            ${b.name} <i data-lucide="edit-2" style="width: 10px; opacity: 0.5;"></i>
+                        </span>
+                    </div>
+                    <button class="btn-icon" onclick="app.handleDeleteSecretCard('${b.id}')" style="width: 24px; height: 24px; padding: 0; background: transparent;" title="Kartı Sil">
+                        <i data-lucide="trash-2" style="width: 14px; color: var(--c-danger); opacity: 0.6;"></i>
                     </button>
                 </div>
-                <div class="form-group">
-                    <label>Kart Adı</label>
-                    <input type="text" class="glass-input" value="${b.name}" onchange="app.updateSecretCardName('${b.id}', this.value)">
+                
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px;">
+                    ${app.formatCurrency(balances[b.id] || 0, b.currency)}
                 </div>
-                <div style="margin-top: 15px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Bakiye:</span>
-                    <div style="font-size: 1.4rem; font-weight: bold;">${app.formatCurrency(balances[b.id] || 0, b.currency)}</div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <div style="font-size: 0.75rem; color: var(--c-usd);">
+                        ${app.formatCurrency(incomes[b.id], b.currency)} (Yıllık Giriş)
+                    </div>
+                    <button class="btn-icon" onclick="app.viewBankStatement('${b.id}')" style="background: rgba(255,255,255,0.03); width: 28px; height: 28px;" title="Ekstre Görüntüle">
+                        <i data-lucide="file-text" style="width:14px; color: var(--primary);"></i>
+                    </button>
                 </div>
-                <div style="margin-top: 5px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Giriş (Yıllık):</span>
-                    <div style="font-size: 1rem; color: var(--c-usd);">${app.formatCurrency(incomes[b.id], b.currency)}</div>
-                </div>
-                <button class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 8px;" onclick="app.viewBankStatement('${b.id}')">
-                    <i data-lucide="file-text" style="width:16px"></i> Ekstre
-                </button>
             </div>`).join('');
 
         const selectOptions = hiddenBanks.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
 
         overlay.innerHTML = `
             <div class="card glass modal large" style="max-height: 90vh; overflow-y: auto;">
-                <div class="modal-header" style="position: sticky; top: 0; background: var(--bg-modal); z-index: 10; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
+                <div class="modal-header" style="position: sticky; top: 0; background: var(--bg-modal); z-index: 10; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border);">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <i data-lucide="shield" style="color: var(--primary);"></i>
-                        <h2 style="color: var(--primary);">Özel Yönetim</h2>
+                        <i data-lucide="lock" style="color: var(--primary);"></i>
+                        <h2 style="color: var(--primary); font-size: 1.25rem;">Gizli Kart Yönetimi</h2>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <button class="btn-icon" onclick="app.handleAddNewSecretCard()" title="Yeni Kart Ekle" style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary); width: 32px; height: 32px;">
@@ -452,22 +455,22 @@ const app = {
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-bottom: 25px;">
                     ${gridHtml}
                 </div>
 
-                <div class="card glass" style="padding: 15px; background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3);">
-                    <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 10px;">Kolay Para Girişi</h3>
+                <div class="card glass" style="padding: 15px; background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3); border-radius: 16px;">
+                    <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 10px;">Hızlı Para Girişi</h3>
                     <form onsubmit="app.handleSecretDeposit(event)" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
-                        <div class="form-group" style="flex: 1; min-width: 150px; margin: 0;">
-                            <label>Hangi Karta?</label>
-                            <select class="glass-input" id="secretBankTarget">${selectOptions}</select>
+                        <div class="form-group" style="flex: 1; min-width: 140px; margin: 0;">
+                            <label>Kart Seçin</label>
+                            <select class="glass-input" id="secretBankTarget" style="padding: 5px 10px;">${selectOptions}</select>
                         </div>
-                        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
+                        <div class="form-group" style="flex: 1; min-width: 100px; margin: 0;">
                             <label>Tutar (KZT)</label>
-                            <input type="number" step="0.01" class="glass-input" id="secretAmount" required>
+                            <input type="number" step="0.01" class="glass-input" id="secretAmount" style="padding: 5px 10px;" required>
                         </div>
-                        <button type="submit" class="btn-primary" style="height: 42px;">Ekle</button>
+                        <button type="submit" class="btn-primary" style="height: 38px; padding: 0 15px;">Ekle</button>
                     </form>
                 </div>
 

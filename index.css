@@ -195,20 +195,31 @@ body {
 .bank-card-top {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     color: var(--primary);
 }
 
+.bank-card-top i {
+    width: 20px;
+    height: 20px;
+}
+
+/* Bank Brand Colors */
+.kaspi-color { color: #f22c2c !important; }
+.halyk-color { color: #00b159 !important; }
+.tr-color { color: #3b82f6 !important; }
+
 .bank-card-top span {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
     color: var(--text-muted);
 }
 
 .bank-card-balance {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text-main);
+    margin-top: 5px;
 }
 
 .card {
@@ -793,13 +804,71 @@ select.glass-input {
 
     /* Modal Alt Butonları Mobil Uyumu */
     .form-group select, .form-group input {
-        font-size: 16px !important; /* iOS zoom engellemek için minimum 16px */
+        font-size: 16px !important; /* Analytics Report Styles */
+.bank-report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.bank-report-card {
+    padding: 20px;
+    border-radius: 20px;
+    border-top: 4px solid var(--primary);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bank-report-card.kaspi { border-top-color: #f22c2c; }
+.bank-report-card.halyk { border-top-color: #00b159; }
+.bank-report-card.tr { border-top-color: #3b82f6; }
+
+.bank-report-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.bank-report-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.stat-row .label { color: var(--text-muted); }
+.stat-row .val { font-weight: 600; }
+
+.bank-report-net {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    text-align: right;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Mobile Tweaks for Analytics */
+@media (max-width: 768px) {
+    .bank-report-grid {
+        grid-template-columns: 1fr;
     }
     
-    .btn-primary, .btn-secondary {
-        padding: 12px 20px; /* Daha kolay dokunuş için */
+    .modal.large {
+        padding: 15px;
     }
 }
+
 
 /* Tablo görünümü için genel kapsayıcı */
 .table-container {

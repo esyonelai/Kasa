@@ -47,7 +47,10 @@
                     <span class="value" id="tryKztRate">---</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn-icon" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0 12px; color: var(--text-main);" onclick="app.openAnalyticsModal()" title="Finansal Raporlar">
+                    <i data-lucide="bar-chart-2"></i>
+                </button>
                 <button class="btn-icon" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0 12px; color: var(--text-main);" onclick="app.openSpecialBankModal()" title="Özel Kasa / Gizli Kartlar">
                     <i data-lucide="shield"></i>
                 </button>
@@ -92,21 +95,21 @@
                 <div class="bank-row">
                     <div class="bank-card glass clickable" onclick="app.viewBankStatement('kaspi')">
                         <div class="bank-card-top">
-                            <i data-lucide="building-2"></i>
+                            <i data-lucide="qr-code" class="kaspi-color"></i>
                             <span class="bank-name">Kaspi Bank</span>
                         </div>
                         <div class="bank-card-balance" id="bankKaspi">0 ₸</div>
                     </div>
                     <div class="bank-card glass clickable" onclick="app.viewBankStatement('halyk')">
                         <div class="bank-card-top">
-                            <i data-lucide="landmark"></i>
+                            <i data-lucide="landmark" class="halyk-color"></i>
                             <span class="bank-name">Halyk Bank</span>
                         </div>
                         <div class="bank-card-balance" id="bankHalyk">0 ₸</div>
                     </div>
                     <div class="bank-card glass clickable" onclick="app.viewBankStatement('tr_bank')">
                         <div class="bank-card-top">
-                            <i data-lucide="banknote"></i>
+                            <i data-lucide="building" class="tr-color"></i>
                             <span class="bank-name">TR Bank</span>
                         </div>
                         <div class="bank-card-balance" id="bankTR">₺0</div>
