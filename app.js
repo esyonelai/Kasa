@@ -428,7 +428,7 @@ const app = {
                     <button class="btn-icon" onclick="app.closeModal()"><i data-lucide="x"></i></button>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px;">
                     <!-- KART 1 -->
                     <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
                         <h3 style="font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">Kart 1 Ayarları</h3>
@@ -473,7 +473,7 @@ const app = {
                 <!-- Hızlı Açılış -->
                 <div class="card glass" style="padding: 15px; background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3);">
                     <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 15px;">Kolay Para Ekle (Açılış)</h3>
-                    <form onsubmit="app.handleSecretDeposit(event)" style="display: flex; gap: 10px; align-items: flex-end;">
+                    <form onsubmit="app.handleSecretDeposit(event)" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
                         <div class="form-group" style="flex: 1; margin: 0;">
                             <label>Hangi Karta?</label>
                             <select class="glass-input" id="secretBankTarget">
@@ -716,8 +716,8 @@ const app = {
                     <button class="btn-icon" onclick="app.closeModal()"><i data-lucide="x"></i></button>
                 </div>
 
-                <div class="statement-controls">
-                    <div class="date-range">
+                <div class="statement-controls" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div class="date-range" style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center; width: 100%;">
                         <input type="date" class="glass-input" id="stmtStart" value="${start.toISOString().split('T')[0]}">
                         <span style="color:var(--text-muted)">-</span>
                         <input type="date" class="glass-input" id="stmtEnd" value="${end.toISOString().split('T')[0]}">
