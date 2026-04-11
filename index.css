@@ -582,13 +582,16 @@ select.glass-input {
     .btn-text { display: none; }
     .btn-add {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        bottom: 30px;
+        right: 30px;
         width: 60px;
         height: 60px;
         border-radius: 50%;
         justify-content: center;
-        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+        z-index: 9999;
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.6);
+        background: var(--primary);
+        border: 2px solid rgba(255,255,255,0.1);
     }
 }
 
