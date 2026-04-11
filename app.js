@@ -366,25 +366,30 @@ const app = {
 
     openSpecialBankModal() {
         const overlay = document.getElementById('modalOverlay');
-        const c1 = Store.state.banks.find(b => b.id === 'secret_card_1');
-        const c2 = Store.state.banks.find(b => b.id === 'secret_card_2');
-
+        const hiddenBanks = Store.state.banks.filter(b => b.isHidden);
+        
         const now = new Date();
         const startOfYear = new Date(now.getFullYear(), 0, 1);
-        let c1Income = 0; let c2Income = 0;
-
+        
+        const balances = Store.getBankBalances();
+        
+        const incomes = {};
+        hiddenBanks.forEach(b => incomes[b.id] = 0);
+        
         Store.state.transactions.forEach(tx => {
-            const txDate = new Date(tx.date);
-            if (txDate >= startOfYear && tx.type === 'income') {
-                if (tx.bankId === 'secret_card_1') c1Income += parseFloat(tx.amount);
-                if (tx.bankId === 'secret_card_2') c2Income += parseFloat(tx.amount);
+            const txDate = new Date(tx.date || Date.now());
+            if (txDate >= startOfYear && tx.type === 'income' && incomes[tx.bankId] !== undefined) {
+                incomes[tx.bankId] += parseFloat(tx.amount);
             }
         });
 
-        const secretTxs = Store.state.transactions.filter(tx => tx.bankId === 'secret_card_1' || tx.bankId === 'secret_card_2' || tx.fromBankId === 'secret_card_1' || tx.fromBankId === 'secret_card_2');
+        const secretTxs = Store.state.transactions.filter(tx => 
+            hiddenBanks.some(b => b.id === tx.bankId || b.id === tx.fromBankId)
+        );
+        
         let secretTxsHtml = '';
         if (secretTxs.length === 0) {
-            secretTxsHtml = `<div class="card glass empty-state" style="text-align:center; padding: 20px;">Henüz işlem bulunamadı.</div>`;
+            secretTxsHtml = '<div class="card glass empty-state" style="text-align:center; padding: 20px;">Henüz işlem bulunamadı.</div>';
         } else {
             secretTxsHtml = secretTxs.map(tx => `
             <div class="card glass transaction-item animate-in" style="margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); padding: 10px;">
@@ -418,6 +423,34 @@ const app = {
             `).join('');
         }
 
+        const gridHtml = hiddenBanks.map(b => `
+            <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">${b.name} Ayarları</h3>
+                <div class="form-group">
+                    <label>Kart Adı & Son 4 Hane</label>
+                    <input type="text" class="glass-input" value="${b.name}" onchange="app.updateSecretCardName('${b.id}', this.value)">
+                </div>
+                <div style="margin-top: 15px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Mevcut Bakiye:</span>
+                    <div style="font-size: 1.4rem; font-weight: bold;">${app.formatCurrency(balances[b.id] || 0, b.currency)}</div>
+                </div>
+                <div style="margin-top: 5px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Bu Yıl Gelen:</span>
+                    <div style="font-size: 1rem; color: var(--c-usd);">${app.formatCurrency(incomes[b.id], b.currency)}</div>
+                </div>
+                <button class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 8px;" onclick="app.viewBankStatement('${b.id}')">
+                    <i data-lucide="file-text" style="width:16px"></i> Ekstre Görüntüle
+                </button>
+            </div>
+        `).join('') + `
+            <div class="card glass" style="padding: 15px; border: 1px dashed var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; min-height: 200px; background: rgba(99, 102, 241, 0.05);" onclick="app.handleAddNewSecretCard()">
+                <i data-lucide="plus-circle" style="width: 32px; height: 32px; color: var(--primary); margin-bottom: 10px;"></i>
+                <span style="color: var(--primary); font-weight: 600;">Yeni Kart Ekle</span>
+            </div>
+        `;
+
+        const selectOptions = hiddenBanks.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
         overlay.innerHTML = `
             <div class="card glass modal large" style="max-height: 90vh; overflow-y: auto;">
                 <div class="modal-header" style="position: sticky; top: 0; background: var(--bg-modal); z-index: 10; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
@@ -429,59 +462,20 @@ const app = {
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px;">
-                    <!-- KART 1 -->
-                    <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                        <h3 style="font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">Kart 1 Ayarları</h3>
-                        <div class="form-group">
-                            <label>Kart Adı & Son 4 Hane</label>
-                            <input type="text" class="glass-input" id="c1Name" value="${c1.name}" onchange="app.updateSecretCardName('secret_card_1', this.value)">
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">Mevcut Bakiye:</span>
-                            <div style="font-size: 1.4rem; font-weight: bold;">${app.formatCurrency(Store.getBankBalances()['secret_card_1'], c1.currency)}</div>
-                        </div>
-                        <div style="margin-top: 5px;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">Bu Yıl Gelen:</span>
-                            <div style="font-size: 1rem; color: var(--c-usd);">${app.formatCurrency(c1Income, c1.currency)}</div>
-                        </div>
-                        <button class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 8px;" onclick="app.viewBankStatement('secret_card_1')">
-                            <i data-lucide="file-text" style="width:16px"></i> Ekstre Görüntüle
-                        </button>
-                    </div>
-
-                    <!-- KART 2 -->
-                    <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                        <h3 style="font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">Kart 2 Ayarları</h3>
-                        <div class="form-group">
-                            <label>Kart Adı & Son 4 Hane</label>
-                            <input type="text" class="glass-input" id="c2Name" value="${c2.name}" onchange="app.updateSecretCardName('secret_card_2', this.value)">
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">Mevcut Bakiye:</span>
-                            <div style="font-size: 1.4rem; font-weight: bold;">${app.formatCurrency(Store.getBankBalances()['secret_card_2'], c2.currency)}</div>
-                        </div>
-                        <div style="margin-top: 5px;">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">Bu Yıl Gelen:</span>
-                            <div style="font-size: 1rem; color: var(--c-usd);">${app.formatCurrency(c2Income, c2.currency)}</div>
-                        </div>
-                        <button class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 8px;" onclick="app.viewBankStatement('secret_card_2')">
-                            <i data-lucide="file-text" style="width:16px"></i> Ekstre Görüntüle
-                        </button>
-                    </div>
+                    ${gridHtml}
                 </div>
 
                 <!-- Hızlı Açılış -->
                 <div class="card glass" style="padding: 15px; background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3);">
                     <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 15px;">Kolay Para Ekle (Açılış)</h3>
                     <form onsubmit="app.handleSecretDeposit(event)" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
-                        <div class="form-group" style="flex: 1; margin: 0;">
+                        <div class="form-group" style="flex: 1; min-width: 150px; margin: 0;">
                             <label>Hangi Karta?</label>
                             <select class="glass-input" id="secretBankTarget">
-                                <option value="secret_card_1">${c1.name}</option>
-                                <option value="secret_card_2">${c2.name}</option>
+                                ${selectOptions}
                             </select>
                         </div>
-                        <div class="form-group" style="flex: 1; margin: 0;">
+                        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
                             <label>Tutar (KZT)</label>
                             <input type="number" step="0.01" class="glass-input" id="secretAmount" required>
                         </div>
@@ -1135,7 +1129,20 @@ const app = {
         overlay.classList.remove('hidden');
         lucide.createIcons();
     }
-};
+,
+
+    updateSecretCardName(id, name) {
+        Store.updateBankName(id, name);
+        this.openSpecialBankModal();
+    },
+
+    handleAddNewSecretCard() {
+        const name = prompt('Yeni Kart İsmi:');
+        if (name) {
+            Store.addSecretBank(name);
+            this.openSpecialBankModal();
+        }
+    }};
 
 window.app = app;
 document.addEventListener('DOMContentLoaded', () => app.init());

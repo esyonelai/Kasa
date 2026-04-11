@@ -10,8 +10,8 @@ const Store = {
             { id: 'kaspi', name: 'Kaspi Bank', currency: 'KZT', balance: 0 },
             { id: 'halyk', name: 'Halyk Bank', currency: 'KZT', balance: 0 },
             { id: 'tr_bank', name: 'TR Bank', currency: 'TRY', balance: 0 },
-            { id: 'secret_card_1', name: 'Kart 1', currency: 'KZT', balance: 0, isHidden: true },
-            { id: 'secret_card_2', name: 'Kart 2', currency: 'KZT', balance: 0, isHidden: true }
+            { id: 'secret_card_1', name: 'IP BAK - 5693', currency: 'KZT', balance: 0, isHidden: true },
+            { id: 'secret_card_2', name: 'IP TLEMIS - 5693', currency: 'KZT', balance: 0, isHidden: true }
         ],
         expenseCenters: [
             'Giderler', 'Açılış', 'Transfer', 'Özel Gider'
@@ -35,20 +35,24 @@ const Store = {
             });
 
             if (data.banks) {
-                const hasSecret1 = data.banks.some(b => b.id === 'secret_card_1');
-                if (!hasSecret1) {
-                    data.banks.push({ id: 'secret_card_1', name: 'Kart 1', currency: 'KZT', balance: 0, isHidden: true });
+                // Secret card 1 enforcement
+                let c1 = data.banks.find(b => b.id === 'secret_card_1');
+                if (!c1) {
+                    data.banks.push({ id: 'secret_card_1', name: 'IP BAK - 5693', currency: 'KZT', balance: 0, isHidden: true });
                 } else {
-                    const c1 = data.banks.find(b => b.id === 'secret_card_1');
-                    c1.currency = 'KZT'; // Enforce KZT 
+                    if (c1.name === 'Kart 1') c1.name = 'IP BAK - 5693';
+                    c1.currency = 'KZT';
+                    c1.isHidden = true;
                 }
 
-                const hasSecret2 = data.banks.some(b => b.id === 'secret_card_2');
-                if (!hasSecret2) {
-                    data.banks.push({ id: 'secret_card_2', name: 'Kart 2', currency: 'KZT', balance: 0, isHidden: true });
+                // Secret card 2 enforcement
+                let c2 = data.banks.find(b => b.id === 'secret_card_2');
+                if (!c2) {
+                    data.banks.push({ id: 'secret_card_2', name: 'IP TLEMIS - 5693', currency: 'KZT', balance: 0, isHidden: true });
                 } else {
-                    const c2 = data.banks.find(b => b.id === 'secret_card_2');
-                    c2.currency = 'KZT'; // Enforce KZT
+                    if (c2.name === 'Kart 2') c2.name = 'IP TLEMIS - 5693';
+                    c2.currency = 'KZT';
+                    c2.isHidden = true;
                 }
             }
 
@@ -104,6 +108,26 @@ const Store = {
         this.state.rates = rates;
         localStorage.setItem('kasa_rates', JSON.stringify(rates));
         this.save();
+    },
+    updateBankName(id, newName) {
+        const bank = this.state.banks.find(b => b.id === id);
+        if (bank) {
+            bank.name = newName;
+            this.save();
+        }
+    },
+
+    addSecretBank(name) {
+        const id = 'secret_card_' + Date.now();
+        this.state.banks.push({
+            id,
+            name: name || 'Yeni Kart',
+            currency: 'KZT',
+            balance: 0,
+            isHidden: true
+        });
+        this.save();
+        return id;
     },
 
     addTransaction(tx) {
