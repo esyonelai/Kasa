@@ -367,12 +367,10 @@ const app = {
     openSpecialBankModal() {
         const overlay = document.getElementById('modalOverlay');
         const hiddenBanks = Store.state.banks.filter(b => b.isHidden);
+        const balances = Store.getBankBalances();
         
         const now = new Date();
         const startOfYear = new Date(now.getFullYear(), 0, 1);
-        
-        const balances = Store.getBankBalances();
-        
         const incomes = {};
         hiddenBanks.forEach(b => incomes[b.id] = 0);
         
@@ -387,11 +385,9 @@ const app = {
             hiddenBanks.some(b => b.id === tx.bankId || b.id === tx.fromBankId)
         );
         
-        let secretTxsHtml = '';
-        if (secretTxs.length === 0) {
-            secretTxsHtml = '<div class="card glass empty-state" style="text-align:center; padding: 20px;">Henüz işlem bulunamadı.</div>';
-        } else {
-            secretTxsHtml = secretTxs.map(tx => `
+        const secretTxsHtml = secretTxs.length === 0 ? 
+            '<div class="card glass empty-state" style="text-align:center; padding: 20px;">Henüz işlem bulunamadı.</div>' :
+            secretTxs.map(tx => `
             <div class="card glass transaction-item animate-in" style="margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); padding: 10px;">
                 <div class="tx-icon ${tx.type}">
                     <i data-lucide="${tx.type === 'income' ? 'trending-up' : (tx.type === 'expense' ? 'trending-down' : 'repeat')}"></i>
@@ -405,49 +401,39 @@ const app = {
                     </div>
                     <div class="tx-meta" style="margin-top: 5px; font-size: 0.85rem; color: var(--text-main); font-weight: 400;">
                         ${tx.note ? `<div class="tx-note" style="margin-bottom: 5px; background: rgba(255,255,255,0.03); padding: 5px 10px; border-radius: 8px;">${tx.note}</div>` : ''}
-                        <span style="opacity: 0.6;">
-                            ${new Date(tx.date).toLocaleDateString()} • 
-                            ${Store.state.banks.find(b => b.id === tx.bankId)?.name || tx.bankId}
-                        </span>
+                        <span style="opacity: 0.6;">${new Date(tx.date).toLocaleDateString()} • ${Store.state.banks.find(b => b.id === tx.bankId)?.name || tx.bankId}</span>
                     </div>
                 </div>
                 <div class="tx-actions">
-                    <button class="btn-icon" onclick="app.editTx(${tx.id})" title="Değiştir">
-                        <i data-lucide="edit-3" style="width:16px; color: var(--primary)"></i>
-                    </button>
-                    <button class="btn-icon" onclick="if(confirm('Silmek istediğinize emin misiniz?')) { Store.deleteTransaction(${tx.id}); app.openSpecialBankModal(); app.renderDashboard(); app.renderTransactions(); }" title="Sil">
-                        <i data-lucide="trash-2" style="width:16px; color: var(--c-danger)"></i>
-                    </button>
+                    <button class="btn-icon" onclick="app.editTx(${tx.id})" title="Değiştir"><i data-lucide="edit-3" style="width:16px; color: var(--primary)"></i></button>
+                    <button class="btn-icon" onclick="if(confirm('Silmek istediğinize emin misiniz?')) { Store.deleteTransaction(${tx.id}); app.openSpecialBankModal(); app.renderDashboard(); app.renderTransactions(); }" title="Sil"><i data-lucide="trash-2" style="width:16px; color: var(--c-danger)"></i></button>
                 </div>
-            </div>
-            `).join('');
-        }
+            </div>`).join('');
 
         const gridHtml = hiddenBanks.map(b => `
-            <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                <h3 style="font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">${b.name} Ayarları</h3>
+            <div class="card glass" style="padding: 15px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">
+                    <h3 style="font-size: 0.9rem; margin: 0; color: var(--text-main); font-weight: 600;">${b.name} Ayarları</h3>
+                    <button class="btn-icon" onclick="app.handleDeleteSecretCard('${b.id}')" style="width: 24px; height: 24px; padding: 0;" title="Kartı Çıkar/Sil">
+                        <i data-lucide="trash-2" style="width:14px; color: var(--c-danger); opacity: 0.6;"></i>
+                    </button>
+                </div>
                 <div class="form-group">
-                    <label>Kart Adı & Son 4 Hane</label>
+                    <label>Kart Adı</label>
                     <input type="text" class="glass-input" value="${b.name}" onchange="app.updateSecretCardName('${b.id}', this.value)">
                 </div>
                 <div style="margin-top: 15px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Mevcut Bakiye:</span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Bakiye:</span>
                     <div style="font-size: 1.4rem; font-weight: bold;">${app.formatCurrency(balances[b.id] || 0, b.currency)}</div>
                 </div>
                 <div style="margin-top: 5px;">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);">Bu Yıl Gelen:</span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Giriş (Yıllık):</span>
                     <div style="font-size: 1rem; color: var(--c-usd);">${app.formatCurrency(incomes[b.id], b.currency)}</div>
                 </div>
                 <button class="btn-secondary" style="width: 100%; margin-top: 15px; padding: 8px;" onclick="app.viewBankStatement('${b.id}')">
-                    <i data-lucide="file-text" style="width:16px"></i> Ekstre Görüntüle
+                    <i data-lucide="file-text" style="width:16px"></i> Ekstre
                 </button>
-            </div>
-        `).join('') + `
-            <div class="card glass" style="padding: 15px; border: 1px dashed var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; min-height: 200px; background: rgba(99, 102, 241, 0.05);" onclick="app.handleAddNewSecretCard()">
-                <i data-lucide="plus-circle" style="width: 32px; height: 32px; color: var(--primary); margin-bottom: 10px;"></i>
-                <span style="color: var(--primary); font-weight: 600;">Yeni Kart Ekle</span>
-            </div>
-        `;
+            </div>`).join('');
 
         const selectOptions = hiddenBanks.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
 
@@ -456,24 +442,26 @@ const app = {
                 <div class="modal-header" style="position: sticky; top: 0; background: var(--bg-modal); z-index: 10; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="shield" style="color: var(--primary);"></i>
-                        <h2 style="color: var(--primary);">Özel Yönetim (Gizli Kartlar)</h2>
+                        <h2 style="color: var(--primary);">Özel Yönetim</h2>
                     </div>
-                    <button class="btn-icon" onclick="app.closeModal()"><i data-lucide="x"></i></button>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="btn-icon" onclick="app.handleAddNewSecretCard()" title="Yeni Kart Ekle" style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); color: var(--primary); width: 32px; height: 32px;">
+                            <i data-lucide="plus" style="width: 18px;"></i>
+                        </button>
+                        <button class="btn-icon" onclick="app.closeModal()"><i data-lucide="x"></i></button>
+                    </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 25px;">
                     ${gridHtml}
                 </div>
 
-                <!-- Hızlı Açılış -->
                 <div class="card glass" style="padding: 15px; background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.3);">
-                    <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 15px;">Kolay Para Ekle (Açılış)</h3>
+                    <h3 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 10px;">Kolay Para Girişi</h3>
                     <form onsubmit="app.handleSecretDeposit(event)" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
                         <div class="form-group" style="flex: 1; min-width: 150px; margin: 0;">
                             <label>Hangi Karta?</label>
-                            <select class="glass-input" id="secretBankTarget">
-                                ${selectOptions}
-                            </select>
+                            <select class="glass-input" id="secretBankTarget">${selectOptions}</select>
                         </div>
                         <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
                             <label>Tutar (KZT)</label>
@@ -483,12 +471,9 @@ const app = {
                     </form>
                 </div>
 
-                <!-- Gizli Kart İşlemleri Gemiş -->
                 <div style="margin-top: 25px;">
                     <h3 style="font-size: 1rem; color: var(--text-main); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">Gizli Kart Son İşlemleri</h3>
-                    <div style="padding-right: 5px;">
-                        ${secretTxsHtml}
-                    </div>
+                    <div style="padding-right: 5px;">${secretTxsHtml}</div>
                 </div>
             </div>
         `;
@@ -1140,6 +1125,13 @@ const app = {
         const name = prompt('Yeni Kart İsmi:');
         if (name) {
             Store.addSecretBank(name);
+            this.openSpecialBankModal();
+        }
+    },
+
+    handleDeleteSecretCard(id) {
+        if (confirm('Bu kartı (ve ayarlarını) silmek istediğinize emin misiniz?')) {
+            Store.deleteBank(id);
             this.openSpecialBankModal();
         }
     }};
