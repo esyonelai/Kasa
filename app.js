@@ -69,13 +69,16 @@ const app = {
             const matchesMonth = currentMonth === 0 || txMonth === currentMonth;
 
             if (matchesYear && matchesMonth) {
-                if (tx.type === 'income') {
-                    bankStats[tx.bankId].income += parseFloat(tx.amount);
-                } else if (tx.type === 'expense') {
-                    bankStats[tx.bankId].expense += parseFloat(tx.amount);
+                const bFrom = bankStats[tx.bankId];
+                const bTo = tx.toBankId ? bankStats[tx.toBankId] : null;
+
+                if (tx.type === 'income' && bFrom) {
+                    bFrom.income += parseFloat(tx.amount);
+                } else if (tx.type === 'expense' && bFrom) {
+                    bFrom.expense += parseFloat(tx.amount);
                 } else if (tx.type === 'transfer') {
-                    if (bankStats[tx.bankId]) bankStats[tx.bankId].expense += parseFloat(tx.amount);
-                    if (bankStats[tx.toBankId]) bankStats[tx.toBankId].income += parseFloat(tx.amount);
+                    if (bFrom) bFrom.expense += parseFloat(tx.amount);
+                    if (bTo) bTo.income += parseFloat(tx.amount);
                 }
             }
         });
