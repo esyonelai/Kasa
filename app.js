@@ -444,7 +444,7 @@ const app = {
             <div class="card glass modal large" style="max-height: 90vh; overflow-y: auto;">
                 <div class="modal-header" style="position: sticky; top: 0; background: var(--bg-modal); z-index: 10; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border);">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <i data-lucide="lock" style="color: var(--primary);"></i>
+                        <i data-lucide="shield" style="color: var(--primary);"></i>
                         <h2 style="color: var(--primary); font-size: 1.25rem;">Gizli Kart Yönetimi</h2>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
