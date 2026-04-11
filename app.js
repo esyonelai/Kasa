@@ -92,7 +92,12 @@ const app = {
 
             const net = b.income - b.expense;
             const netColor = net >= 0 ? 'var(--c-income)' : 'var(--c-expense)';
-            const bankClass = id === 'kaspi' ? 'kaspi' : (id === 'halyk' ? 'halyk' : (id === 'tr_bank' ? 'tr' : ''));
+            let bankClass = '';
+            if (id === 'kaspi') bankClass = 'kaspi';
+            else if (id === 'halyk') bankClass = 'halyk';
+            else if (id === 'tr_bank') bankClass = 'tr';
+            else if (id.includes('secret_card_1')) bankClass = 'secret1';
+            else if (id.includes('secret_card_2')) bankClass = 'secret2';
 
             return `
                 <div class="glass bank-report-card ${bankClass}">

@@ -511,7 +511,11 @@ body {
     padding: 30px;
     position: relative;
     overflow-y: auto;
-    max-height: 90vh;
+    max-height: 95vh;
+}
+
+.modal.large {
+    max-width: 900px;
 }
 
 .modal-header {
@@ -878,6 +882,8 @@ select.glass-input {
 .bank-report-card.kaspi { border-top-color: #ef4444; }
 .bank-report-card.halyk { border-top-color: #22c55e; }
 .bank-report-card.tr { border-top-color: #3b82f6; }
+.bank-report-card.secret1 { border-top-color: #a855f7; }
+.bank-report-card.secret2 { border-top-color: #f97316; }
 
 .bank-header {
     display: flex;
