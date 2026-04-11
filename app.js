@@ -49,6 +49,122 @@ const app = {
         document.getElementById('tryKztRate').textContent = Store.state.rates.usdTry + ' ₺';
     },
 
+    openAnalyticsModal(month = null, year = null) {
+        const overlay = document.getElementById('modalOverlay');
+        const now = new Date();
+        const currentYear = year || now.getFullYear();
+        const currentMonth = month !== null ? parseInt(month) : now.getMonth() + 1;
+
+        const bankStats = {};
+        Store.state.banks.forEach(b => {
+            bankStats[b.id] = { name: b.name, income: 0, expense: 0, currency: b.currency, isHidden: b.isHidden };
+        });
+
+        Store.state.transactions.forEach(tx => {
+            const txDate = new Date(tx.date);
+            const txYear = txDate.getFullYear();
+            const txMonth = txDate.getMonth() + 1;
+
+            const matchesYear = txYear === parseInt(currentYear);
+            const matchesMonth = currentMonth === 0 || txMonth === currentMonth;
+
+            if (matchesYear && matchesMonth) {
+                if (tx.type === 'income') {
+                    bankStats[tx.bankId].income += parseFloat(tx.amount);
+                } else if (tx.type === 'expense') {
+                    bankStats[tx.bankId].expense += parseFloat(tx.amount);
+                } else if (tx.type === 'transfer') {
+                    if (bankStats[tx.bankId]) bankStats[tx.bankId].expense += parseFloat(tx.amount);
+                    if (bankStats[tx.toBankId]) bankStats[tx.toBankId].income += parseFloat(tx.amount);
+                }
+            }
+        });
+
+        const totalIncomeKzt = Object.values(bankStats).reduce((acc, b) => acc + Store.convert(b.income, b.currency, 'KZT'), 0);
+        const totalExpenseKzt = Object.values(bankStats).reduce((acc, b) => acc + Store.convert(b.expense, b.currency, 'KZT'), 0);
+
+        const bankCardsHtml = Object.keys(bankStats).map(id => {
+            const b = bankStats[id];
+            if (b.income === 0 && b.expense === 0) return ''; 
+
+            const net = b.income - b.expense;
+            const netColor = net >= 0 ? 'var(--c-income)' : 'var(--c-danger)';
+            const bankClass = id === 'kaspi' ? 'kaspi' : (id === 'halyk' ? 'halyk' : (id === 'tr_bank' ? 'tr' : ''));
+
+            return `
+                <div class="glass bank-report-card ${bankClass}">
+                    <div class="bank-report-header">
+                        <i data-lucide="${b.isHidden ? 'lock' : 'landmark'}" style="width:16px;"></i>
+                        ${b.name}
+                    </div>
+                    <div class="bank-report-stats">
+                        <div class="stat-row">
+                            <span class="label">Giriş:</span>
+                            <span class="val" style="color:var(--c-income);">+${this.formatCurrency(b.income, b.currency)}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Çıkış:</span>
+                            <span class="val" style="color:var(--c-danger);">-${this.formatCurrency(b.expense, b.currency)}</span>
+                        </div>
+                    </div>
+                    <div class="bank-report-net" style="color:${netColor}">
+                        ${net >= 0 ? '+' : ''}${this.formatCurrency(net, b.currency)}
+                    </div>
+                </div>`;
+        }).join('');
+
+        const monthOptions = [
+            { v: 0, n: 'Tüm Yıl (Yıllık)' },
+            { v: 1, n: 'Ocak' }, { v: 2, n: 'Şubat' }, { v: 3, n: 'Mart' },
+            { v: 4, n: 'Nisan' }, { v: 5, n: 'Mayıs' }, { v: 6, n: 'Haziran' },
+            { v: 7, n: 'Temmuz' }, { v: 8, n: 'Ağustos' }, { v: 9, n: 'Eylül' },
+            { v: 10, n: 'Ekim' }, { v: 11, n: 'Kasım' }, { v: 12, n: 'Aralık' }
+        ].map(m => `<option value="${m.v}" ${currentMonth === m.v ? 'selected' : ''}>${m.n}</option>`).join('');
+
+        overlay.innerHTML = `
+            <div class="card glass modal large" style="max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header" style="position: sticky; top: 0; background: var(--bg-modal); z-index: 10; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="wallet" style="color: var(--primary);"></i>
+                        <h2 style="color: var(--primary); font-size: 1.25rem;">Finansal Raporlar</h2>
+                    </div>
+                    <button class="btn-icon" onclick="app.closeModal()"><i data-lucide="x"></i></button>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">
+                        ${currentMonth === 0 ? currentYear : (document.querySelector('option[selected]')?.text || 'Seçili Ay') + ' ' + currentYear} Performansı
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <select class="glass-input" style="padding: 5px 10px; font-size: 0.8rem;" onchange="app.openAnalyticsModal(this.value, ${currentYear})">
+                            ${monthOptions}
+                        </select>
+                        <select class="glass-input" style="padding: 5px 10px; font-size: 0.8rem;" onchange="app.openAnalyticsModal(${currentMonth}, this.value)">
+                            <option value="2026" ${currentYear === 2026 ? 'selected' : ''}>2026</option>
+                            <option value="2025" ${currentYear === 2025 ? 'selected' : ''}>2025</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                    <div class="glass" style="text-align: center; padding: 15px; border-left: 4px solid var(--c-income); border-radius: 12px;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Toplam Gelir</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--c-income); margin-top: 5px;">+${this.formatCurrency(totalIncomeKzt, 'KZT')}</div>
+                    </div>
+                    <div class="glass" style="text-align: center; padding: 15px; border-left: 4px solid var(--c-danger); border-radius: 12px;">
+                        <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Toplam Gider</div>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: var(--c-danger); margin-top: 5px;">-${this.formatCurrency(totalExpenseKzt, 'KZT')}</div>
+                    </div>
+                </div>
+
+                <div class="bank-report-grid">
+                    ${bankCardsHtml || '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">Bu dönemde herhangi bir banka hareketi bulunamadı.</div>'}
+                </div>
+            </div>`;
+        overlay.classList.remove('hidden');
+        lucide.createIcons();
+    },
+
 
     renderDashboard() {
         const balances = Store.getBankBalances();
