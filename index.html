@@ -33,7 +33,7 @@
     <div id="app">
         <!-- Navigation / Top Bar -->
         <nav class="top-bar">
-            <div class="logo clickable" onclick="app.openAnalyticsModal()" style="cursor: pointer;">
+            <div class="logo">
                 <i data-lucide="wallet"></i>
                 <span>Kasa</span>
             </div>
@@ -48,6 +48,9 @@
                 </div>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
+                <button class="btn-icon" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0 12px; color: var(--text-main);" onclick="app.openAnalyticsModal()" title="Finansal Raporlar">
+                    <i data-lucide="bar-chart-2"></i>
+                </button>
                 <button class="btn-icon" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; padding: 0 12px; color: var(--text-main);" onclick="app.openSpecialBankModal()" title="Özel Kasa / Gizli Kartlar">
                     <i data-lucide="shield"></i>
                 </button>
