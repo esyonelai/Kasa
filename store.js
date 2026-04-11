@@ -9,7 +9,9 @@ const Store = {
         banks: [
             { id: 'kaspi', name: 'Kaspi Bank', currency: 'KZT', balance: 0 },
             { id: 'halyk', name: 'Halyk Bank', currency: 'KZT', balance: 0 },
-            { id: 'tr_bank', name: 'TR Bank', currency: 'TRY', balance: 0 }
+            { id: 'tr_bank', name: 'TR Bank', currency: 'TRY', balance: 0 },
+            { id: 'secret_card_1', name: 'Kart 1', currency: 'KZT', balance: 0, isHidden: true },
+            { id: 'secret_card_2', name: 'Kart 2', currency: 'KZT', balance: 0, isHidden: true }
         ],
         expenseCenters: [
             'Giderler', 'Açılış', 'Transfer', 'Özel Gider'
@@ -31,6 +33,24 @@ const Store = {
             defaults.forEach(def => {
                 if (!data.expenseCenters.includes(def)) data.expenseCenters.push(def);
             });
+
+            if (data.banks) {
+                const hasSecret1 = data.banks.some(b => b.id === 'secret_card_1');
+                if (!hasSecret1) {
+                    data.banks.push({ id: 'secret_card_1', name: 'Kart 1', currency: 'KZT', balance: 0, isHidden: true });
+                } else {
+                    const c1 = data.banks.find(b => b.id === 'secret_card_1');
+                    c1.currency = 'KZT'; // Enforce KZT 
+                }
+
+                const hasSecret2 = data.banks.some(b => b.id === 'secret_card_2');
+                if (!hasSecret2) {
+                    data.banks.push({ id: 'secret_card_2', name: 'Kart 2', currency: 'KZT', balance: 0, isHidden: true });
+                } else {
+                    const c2 = data.banks.find(b => b.id === 'secret_card_2');
+                    c2.currency = 'KZT'; // Enforce KZT
+                }
+            }
 
             // Ensure rates exist
             data.rates = { ...this.state.rates, ...(data.rates || {}) };
@@ -153,23 +173,7 @@ const Store = {
         this.save();
     },
 
-    getBankBalances() {
-        const balances = { kaspi: 0, halyk: 0, tr_bank: 0 };
-        const rt = this.state.rates;
-
-        this.state.transactions.forEach(tx => {
-            const amount = parseFloat(tx.amount);
-            const bank = this.state.banks.find(b => b.id === tx.bankId);
-            if (!bank) return;
-
-            const finalAmount = this.convert(amount, tx.currency, bank.currency);
-
-            if (tx.type === 'income') balances[tx.bankId] += finalAmount;
-            else if (tx.type === 'expense') balances[tx.bankId] -= finalAmount;
-        });
-
-        return balances;
-    },
+    getBankBalances() { const balances = { kaspi: 0, halyk: 0, tr_bank: 0 }; const rt = this.state.rates; this.state.transactions.forEach(tx => { const amount = parseFloat(tx.amount); const bank = this.state.banks.find(b => b.id === tx.bankId); if (!bank) return; if (balances[tx.bankId] === undefined) { balances[tx.bankId] = 0; } const finalAmount = this.convert(amount, tx.currency, bank.currency); if (tx.type === 'income') balances[tx.bankId] += finalAmount; else if (tx.type === 'expense') balances[tx.bankId] -= finalAmount; }); this.state.banks.forEach(b => { if (balances[b.id] === undefined) balances[b.id] = 0; }); return balances; },
 
     getTotalInKzt() {
         const balances = this.getBankBalances();
