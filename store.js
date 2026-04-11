@@ -114,11 +114,12 @@ const Store = {
         if (bank) {
             bank.name = newName;
             this.save();
-        },
+        }
+    },
+
     deleteBank(id) {
         this.state.banks = this.state.banks.filter(b => b.id !== id);
         this.save();
-    },
     },
 
     addSecretBank(name) {
