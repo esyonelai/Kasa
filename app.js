@@ -1297,6 +1297,30 @@ const app = {
                 note: note || 'Borç/Avans Geri Dönüşü',
                 rateUsed: currency === 'USD' ? Store.state.rates.usdKzt : (currency === 'TRY' ? Store.state.rates.usdKzt / Store.state.rates.usdTry : 1)
             });
+
+            // OTOMATIK BORC/AVANS KAPATMA (Kısmi ödeme dahil)
+            let amountKzt = Store.convert(amount, currency, 'KZT');
+            let pendingTxs = Store.state.transactions
+                .filter(t => t.contact === contactName && ((t.isDebt && t.debtStatus === 'pending') || (t.isAdvance && t.advanceStatus === 'pending')))
+                .sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+            for(let tx of pendingTxs) {
+                if(amountKzt <= 0) break;
+                let txAmountKzt = Store.convert(parseFloat(tx.amount), tx.currency, 'KZT');
+                if (amountKzt >= txAmountKzt - 0.01) {
+                    // Tamamen ödendi
+                    if (tx.isDebt) tx.debtStatus = 'returned';
+                    if (tx.isAdvance) tx.advanceStatus = 'returned';
+                    amountKzt -= txAmountKzt;
+                } else {
+                    // Kısmi ödeme yapıldı
+                    let remainingKzt = txAmountKzt - amountKzt;
+                    tx.amount = Store.convert(remainingKzt, 'KZT', tx.currency).toFixed(2);
+                    amountKzt = 0;
+                }
+            }
+            Store.save();
+
             this.viewContactStatement(contactName); // Refresh modal
             this.renderDashboard();
             this.renderTransactions();
@@ -1305,7 +1329,7 @@ const app = {
                 this.renderContactDirectory();
             }
         }
-    },
+    },    },
 
     updateSecretCardName(id, name) {
         Store.updateBankName(id, name);
