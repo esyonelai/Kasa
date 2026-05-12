@@ -1329,7 +1329,7 @@ const app = {
                 this.renderContactDirectory();
             }
         }
-    },    },
+    },
 
     updateSecretCardName(id, name) {
         Store.updateBankName(id, name);
