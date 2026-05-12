@@ -1191,6 +1191,8 @@ const app = {
         const overlay = document.getElementById('modalOverlay');
         const txs = Store.state.transactions.filter(tx => tx.contact === contactName)
             .sort((a, b) => new Date(a.date) - new Date(b.date));
+        const bankOptions = Store.state.banks.filter(b => !b.isHidden).map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
 
         overlay.innerHTML = `
             <div class="card glass modal large" style="max-width: 900px;">
@@ -1202,6 +1204,36 @@ const app = {
                     <button class="btn-icon" onclick="app.closeModal()"><i data-lucide="x"></i></button>
                 </div>
                 
+                
+                <!-- Hızlı Tahsilat Ekle Formu -->
+                <div class="card glass" style="margin-top: 15px; padding: 15px; background: rgba(16, 185, 129, 0.05); border: 1px dashed rgba(16, 185, 129, 0.3);">
+                    <h3 style="font-size: 0.9rem; color: #10b981; margin-bottom: 10px;">Hızlı Tahsilat / Geri Ödeme Ekle</h3>
+                    <form onsubmit="app.handleContactCollection(event, '${contactName}')" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
+                            <label>Tutar</label>
+                            <input type="number" step="0.01" class="glass-input" id="colAmount" required>
+                        </div>
+                        <div class="form-group" style="width: 80px; margin: 0;">
+                            <label>Birim</label>
+                            <select class="glass-input" id="colCurrency">
+                                <option value="KZT">KZT</option>
+                                <option value="USD">USD</option>
+                                <option value="TRY">TRY</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 120px; margin: 0;">
+                            <label>Kasa/Banka</label>
+                            <select class="glass-input" id="colBank">
+                                ${bankOptions}
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 2; min-width: 150px; margin: 0;">
+                            <label>Açıklama</label>
+                            <input type="text" class="glass-input" id="colNote" placeholder="İsteğe bağlı">
+                        </div>
+                        <button type="submit" class="btn-primary" style="background: #10b981 !important; height: 38px;">Tahsil Et</button>
+                    </form>
+                </div>
                 <div class="table-container" style="margin-top: 20px; overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                         <thead style="background: rgba(255,255,255,0.05);">
@@ -1245,6 +1277,35 @@ const app = {
         lucide.createIcons();
     }
 ,
+
+    
+    handleContactCollection(event, contactName) {
+        event.preventDefault();
+        const amount = parseFloat(document.getElementById('colAmount').value);
+        const currency = document.getElementById('colCurrency').value;
+        const bankId = document.getElementById('colBank').value;
+        const note = document.getElementById('colNote').value;
+
+        if (amount > 0) {
+             Store.addTransaction({
+                type: 'income',
+                amount: amount,
+                currency: currency,
+                bankId: bankId,
+                category: 'Tahsilat',
+                contact: contactName,
+                note: note || 'Borç/Avans Geri Dönüşü',
+                rateUsed: currency === 'USD' ? Store.state.rates.usdKzt : (currency === 'TRY' ? Store.state.rates.usdKzt / Store.state.rates.usdTry : 1)
+            });
+            this.viewContactStatement(contactName); // Refresh modal
+            this.renderDashboard();
+            this.renderTransactions();
+            this.renderExpenseStats();
+            if (typeof this.renderContactDirectory === 'function') {
+                this.renderContactDirectory();
+            }
+        }
+    },
 
     updateSecretCardName(id, name) {
         Store.updateBankName(id, name);
